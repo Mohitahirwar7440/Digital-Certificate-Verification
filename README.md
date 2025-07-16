@@ -226,9 +226,6 @@ We welcome contributions to the Digital Certificate Verification project! Please
 - Regular security audits are recommended for production deployments
 - Consider implementing multi-signature wallets for enhanced security
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
@@ -239,4 +236,5 @@ For questions, issues, or contributions, please:
 
 ---
 
-Built with ❤️ using Hardhat, Solidity, and Core Blockchain Technology
+<img width="1772" height="772" alt="image" src="https://github.com/user-attachments/assets/7ad7dfcb-c65d-4857-b74b-2d46ceb7edfd" />
+

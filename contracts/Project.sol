@@ -13,7 +13,7 @@ contract Project {
 
     mapping(bytes32 => Certificate) public certificates;
     mapping(address => bool) public authorizedIssuers;
-    mapping(address => uint256) public certificatesIssuedBy; // 🔹 Track issuer's certificate count
+    mapping(address => uint256) public certificatesIssuedBy;
 
     address public owner;
     uint256 public totalCertificates;
@@ -133,15 +133,4 @@ contract Project {
 
     function revokeIssuer(address _issuer) public onlyOwner {
         require(_issuer != owner, "Cannot revoke owner");
-        require(authorizedIssuers[_issuer], "Issuer is not authorized");
-
-        authorizedIssuers[_issuer] = false;
-
-        emit IssuerRevoked(_issuer);
-    }
-
-    // 🔹 New function: Get number of certificates issued by an address
-    function getCertificatesIssuedBy(address _issuer) public view returns (uint256) {
-        return certificatesIssuedBy[_issuer];
-    }
-}
+        re

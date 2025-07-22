@@ -14,6 +14,7 @@ contract Project {
     mapping(bytes32 => Certificate) public certificates;
     mapping(address => bool) public authorizedIssuers;
     mapping(address => uint256) public certificatesIssuedBy;
+    mapping(address => bytes32[]) private certificatesByIssuer;
 
     address public owner;
     uint256 public totalCertificates;
@@ -29,6 +30,7 @@ contract Project {
     event CertificateRevoked(bytes32 indexed certificateId);
     event IssuerAuthorized(address indexed issuer);
     event IssuerRevoked(address indexed issuer);
+    event OwnershipTransferred(address indexed oldOwner, address indexed newOwner);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can perform this action");
@@ -79,6 +81,7 @@ contract Project {
 
         totalCertificates++;
         certificatesIssuedBy[msg.sender]++;
+        certificatesByIssuer[msg.sender].push(certificateId);
 
         emit CertificateIssued(
             certificateId,
@@ -133,4 +136,40 @@ contract Project {
 
     function revokeIssuer(address _issuer) public onlyOwner {
         require(_issuer != owner, "Cannot revoke owner");
-        re
+        require(authorizedIssuers[_issuer], "Issuer not found");
+
+        authorizedIssuers[_issuer] = false;
+
+        emit IssuerRevoked(_issuer);
+    }
+
+    function changeOwner(address _newOwner) public onlyOwner {
+        require(_newOwner != address(0), "Invalid address");
+        address oldOwner = owner;
+        owner = _newOwner;
+
+        emit OwnershipTransferred(oldOwner, _newOwner);
+    }
+
+    function getCertificateCountByIssuer(address _issuer) public view returns (uint256) {
+        return certificatesIssuedBy[_issuer];
+    }
+
+    function getCertificateHash(bytes32 _certificateId) public view returns (string memory) {
+        require(certificates[_certificateId].issueDate > 0, "Certificate does not exist");
+        return certificates[_certificateId].certificateHash;
+    }
+
+    function getAllCertificatesIssuedBy(address _issuer) public view returns (bytes32[] memory) {
+        return certificatesByIssuer[_issuer];
+    }
+
+    function isAuthorizedIssuer(address _issuer) public view returns (bool) {
+        return authorizedIssuers[_issuer];
+    }
+
+    function getCertificateDetails(bytes32 _certificateId) public view returns (Certificate memory) {
+        require(certificates[_certificateId].issueDate > 0, "Certificate does not exist");
+        return certificates[_certificateId];
+    }
+}

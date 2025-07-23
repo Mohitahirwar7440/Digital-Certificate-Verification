@@ -19,6 +19,8 @@ contract Project {
     address public owner;
     uint256 public totalCertificates;
 
+    address[] private issuerList;
+
     event CertificateIssued(
         bytes32 indexed certificateId,
         string recipientName,
@@ -45,6 +47,7 @@ contract Project {
     constructor() {
         owner = msg.sender;
         authorizedIssuers[msg.sender] = true;
+        issuerList.push(msg.sender);
     }
 
     function issueCertificate(
@@ -106,7 +109,6 @@ contract Project {
         )
     {
         Certificate memory cert = certificates[_certificateId];
-
         return (
             cert.isValid && cert.issueDate > 0,
             cert.recipientName,
@@ -130,6 +132,7 @@ contract Project {
         require(!authorizedIssuers[_issuer], "Issuer already authorized");
 
         authorizedIssuers[_issuer] = true;
+        issuerList.push(_issuer);
 
         emit IssuerAuthorized(_issuer);
     }
@@ -171,5 +174,76 @@ contract Project {
     function getCertificateDetails(bytes32 _certificateId) public view returns (Certificate memory) {
         require(certificates[_certificateId].issueDate > 0, "Certificate does not exist");
         return certificates[_certificateId];
+    }
+
+    function certificateExists(bytes32 _certificateId) public view returns (bool) {
+        return certificates[_certificateId].issueDate > 0;
+    }
+
+    function transferCertificate(bytes32 _certificateId, string memory _newRecipientName) public onlyAuthorizedIssuer {
+        require(certificates[_certificateId].issueDate > 0, "Certificate does not exist");
+        require(certificates[_certificateId].isValid, "Certificate is not valid");
+        require(bytes(_newRecipientName).length > 0, "New recipient name is empty");
+
+        certificates[_certificateId].recipientName = _newRecipientName;
+    }
+
+    function getValidCertificateCountByIssuer(address _issuer) public view returns (uint256) {
+        uint256 count = 0;
+        bytes32[] memory certs = certificatesByIssuer[_issuer];
+        for (uint256 i = 0; i < certs.length; i++) {
+            if (certificates[certs[i]].isValid) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    function getCertificatesByCourse(address _issuer, string memory _courseName) public view returns (bytes32[] memory) {
+        bytes32[] memory allCerts = certificatesByIssuer[_issuer];
+        uint256 count = 0;
+
+        for (uint256 i = 0; i < allCerts.length; i++) {
+            if (
+                keccak256(bytes(certificates[allCerts[i]].courseName)) ==
+                keccak256(bytes(_courseName))
+            ) {
+                count++;
+            }
+        }
+
+        bytes32[] memory filtered = new bytes32[](count);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < allCerts.length; i++) {
+            if (
+                keccak256(bytes(certificates[allCerts[i]].courseName)) ==
+                keccak256(bytes(_courseName))
+            ) {
+                filtered[index++] = allCerts[i];
+            }
+        }
+
+        return filtered;
+    }
+
+    function getAllAuthorizedIssuers() public view returns (address[] memory) {
+        uint256 count = 0;
+        for (uint256 i = 0; i < issuerList.length; i++) {
+            if (authorizedIssuers[issuerList[i]]) {
+                count++;
+            }
+        }
+
+        address[] memory activeIssuers = new address[](count);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < issuerList.length; i++) {
+            if (authorizedIssuers[issuerList[i]]) {
+                activeIssuers[index++] = issuerList[i];
+            }
+        }
+
+        return activeIssuers;
     }
 }

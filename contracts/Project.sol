@@ -246,4 +246,38 @@ contract Project {
 
         return activeIssuers;
     }
+
+    // 🔥 NEW FUNCTION ADDED HERE
+    function getCertificatesByInstitution(string memory _institution) public view returns (bytes32[] memory) {
+        uint256 totalMatches = 0;
+
+        for (uint256 i = 0; i < issuerList.length; i++) {
+            bytes32[] memory certs = certificatesByIssuer[issuerList[i]];
+            for (uint256 j = 0; j < certs.length; j++) {
+                if (
+                    keccak256(bytes(certificates[certs[j]].issuingInstitution)) ==
+                    keccak256(bytes(_institution))
+                ) {
+                    totalMatches++;
+                }
+            }
+        }
+
+        bytes32[] memory matches = new bytes32[](totalMatches);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < issuerList.length; i++) {
+            bytes32[] memory certs = certificatesByIssuer[issuerList[i]];
+            for (uint256 j = 0; j < certs.length; j++) {
+                if (
+                    keccak256(bytes(certificates[certs[j]].issuingInstitution)) ==
+                    keccak256(bytes(_institution))
+                ) {
+                    matches[index++] = certs[j];
+                }
+            }
+        }
+
+        return matches;
+    }
 }

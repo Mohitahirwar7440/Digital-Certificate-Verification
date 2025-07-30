@@ -88,7 +88,6 @@ contract Project {
         return revokedCerts;
     }
 
-    // ✅ New Function: Get all valid certificates issued by an issuer
     function getValidCertificatesByIssuer(address _issuer) public view returns (bytes32[] memory) {
         bytes32[] memory allCerts = certificatesByIssuer[_issuer];
         uint256 count = 0;
@@ -109,5 +108,26 @@ contract Project {
         }
 
         return validCerts;
+    }
+
+    // ✅ New Function: Get full certificate details by certificate ID
+    function getCertificateDetails(bytes32 certId) public view returns (
+        string memory recipientName,
+        string memory courseName,
+        string memory issuingInstitution,
+        uint256 issueDate,
+        string memory certificateHash,
+        bool isValid
+    ) {
+        Certificate memory cert = certificates[certId];
+        require(cert.issueDate > 0, "Certificate does not exist");
+        return (
+            cert.recipientName,
+            cert.courseName,
+            cert.issuingInstitution,
+            cert.issueDate,
+            cert.certificateHash,
+            cert.isValid
+        );
     }
 }

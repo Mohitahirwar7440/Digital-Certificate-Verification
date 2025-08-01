@@ -110,7 +110,6 @@ contract Project {
         return validCerts;
     }
 
-    // ✅ New Function: Get full certificate details by certificate ID
     function getCertificateDetails(bytes32 certId) public view returns (
         string memory recipientName,
         string memory courseName,
@@ -129,5 +128,10 @@ contract Project {
             cert.certificateHash,
             cert.isValid
         );
+    }
+
+    // ✅ New Function: Get all certificate IDs issued by an issuer
+    function getCertificateIdsByIssuer(address _issuer) public view returns (bytes32[] memory) {
+        return certificatesByIssuer[_issuer];
     }
 }

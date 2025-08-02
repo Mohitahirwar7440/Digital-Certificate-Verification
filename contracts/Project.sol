@@ -130,8 +130,13 @@ contract Project {
         );
     }
 
-    // ✅ New Function: Get all certificate IDs issued by an issuer
+    // ✅ Existing Function: Get all certificate IDs issued by an issuer
     function getCertificateIdsByIssuer(address _issuer) public view returns (bytes32[] memory) {
         return certificatesByIssuer[_issuer];
+    }
+
+    // ✅ New Function: Get total number of certificates issued by an issuer
+    function getCertificateCountByIssuer(address _issuer) public view returns (uint256) {
+        return certificatesByIssuer[_issuer].length;
     }
 }

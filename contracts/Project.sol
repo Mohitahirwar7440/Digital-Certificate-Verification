@@ -32,14 +32,17 @@ contract Project {
         _;
     }
 
+    // Authorize issuer
     function authorizeIssuer(address _issuer) public onlyOwner {
         authorizedIssuers[_issuer] = true;
     }
 
+    // Revoke issuer
     function revokeIssuer(address _issuer) public onlyOwner {
         authorizedIssuers[_issuer] = false;
     }
 
+    // Issue a new certificate
     function issueCertificate(
         address recipient,
         string memory recipientName,
@@ -61,11 +64,13 @@ contract Project {
         certificatesByIssuer[msg.sender].push(certId);
     }
 
+    // Revoke a certificate
     function revokeCertificate(bytes32 certId) public onlyAuthorizedIssuer {
         require(certificates[certId].issueDate > 0, "Certificate does not exist");
         certificates[certId].isValid = false;
     }
 
+    // Get revoked certificates by a specific issuer
     function getRevokedCertificatesByIssuer(address _issuer) public view returns (bytes32[] memory) {
         bytes32[] memory allCerts = certificatesByIssuer[_issuer];
         uint256 count = 0;
@@ -76,4 +81,22 @@ contract Project {
             }
         }
 
-        bytes32[]
+        bytes32[] memory revokedCerts = new bytes32[](count);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < allCerts.length; i++) {
+            if (!certificates[allCerts[i]].isValid && certificates[allCerts[i]].issueDate > 0) {
+                revokedCerts[index] = allCerts[i];
+                index++;
+            }
+        }
+
+        return revokedCerts;
+    }
+
+    // ✅ NEW FUNCTION: Get all certificates issued by an issuer
+    function getCertificatesByIssuer(address _issuer) public view returns (bytes32[] memory) {
+        return certificatesByIssuer[_issuer];
+    }
+}
+
